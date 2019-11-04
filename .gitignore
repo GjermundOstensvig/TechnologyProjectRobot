@@ -1,7 +1,0 @@
-#Pycharm specific code
-venv/
-.idea
-vid.mp4
-skole.h264
-kjeller.h264
-.gitignore
