@@ -1,6 +1,6 @@
 import cv2
 
-fil = "final.mp4"
+fil = "vid.mp4"
 video = cv2.VideoCapture(fil)
 # video = cv2.VideoCapture(0)
 # video.set(3, 640)
@@ -22,6 +22,21 @@ def punktGenerator(punkter, verdier, omraade, retning, fra, til, intervall):
 		else:
 			punkter[0].append(i * intervall)
 	for j in range(fra, til+1):
+		if retning == 0:
+			verdier.append(omraade[1, punkter[0][j - 1]]) #FRA ROW 1, COLUMN punkter[0][j - 1]
+		else:
+			verdier.append(omraade[punkter[0][j - 1], 1])
+	return verdier
+
+def punktGenerator(punkter, verdier, omraade, retning, antPunkter):
+	punkter.append([])
+	avstandMPunkter = int((w-antPunkter)/antPunkter)
+	for i in range(1, antPunkter + 1):
+		if retning == 0:
+			punkter[0].append((w - avstandMPunkter))
+		else:
+			punkter[0].append((i+avstandMPunkter)*i)
+	for j in range(1, antPunkter + 1):
 		if retning == 0:
 			verdier.append(omraade[1, punkter[0][j - 1]]) #FRA ROW 1, COLUMN punkter[0][j - 1]
 		else:
@@ -54,7 +69,8 @@ while True:
 
 	kryss = thresh[h_senter - 2:h_senter, 1:w]
 	sensorKryssPunkter, sensorKryssVerdier = [], []
-	punktGenerator(sensorKryssPunkter, sensorKryssVerdier, kryss, 0, 1, 10, 5)  # 0 for horisontal
+	#punktGenerator(sensorKryssPunkter, sensorKryssVerdier, kryss, 0, 1, 10, 5)  # 0 for horisontal
+	punktGenerator(sensorKryssPunkter, sensorKryssVerdier, kryss, 0, 10)  # 0 for horisontal
 
 	if len(contours_main_tracker) > 0:
 
