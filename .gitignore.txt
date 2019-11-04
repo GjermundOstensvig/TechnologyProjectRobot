@@ -1,0 +1,6 @@
+#Pycharm specific code
+venv
+.idea
+vid
+skole
+kjeller
