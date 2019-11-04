@@ -1,6 +1,7 @@
 import cv2
 
-fil = "vid.mp4"
+# vid.mp4
+fil = "skole.h264"
 video = cv2.VideoCapture(fil)
 
 if video.isOpened():
@@ -27,15 +28,15 @@ def punkt_generator(punkter, verdier, omraade, retning, fra, til, intervall):
     return verdier
 
 
-def punkt_generator(punkter, verdier, omraade, retning, antPunkter):
+def punkt_generator(punkter, verdier, omraade, retning, ant_punkter):
     punkter.append([])
-    avstandMPunkter = int((width - antPunkter) / antPunkter)
-    for i in range(1, antPunkter + 1):
+    avstandMPunkter = int((width - ant_punkter) / ant_punkter)
+    for i in range(1, ant_punkter + 1):
         if retning == 0:
             punkter[0].append((width - avstandMPunkter))
         else:
             punkter[0].append((i + avstandMPunkter) * i)
-    for j in range(1, antPunkter + 1):
+    for j in range(1, ant_punkter + 1):
         if retning == 0:
             verdier.append(omraade[1, punkter[0][j - 1]])  # FRA ROW 1, COLUMN punkter[0][j - 1]
         else:
@@ -70,34 +71,35 @@ while True:
 
     kryss = thresh[h_senter - 2:h_senter, 1:width]
     sensor_kryss_punkter, sensor_kryss_verdier = [], []
-    # punkt_generator(sensor_kryss_punkter, sensor_kryss_verdier, kryss, 0, 1, 10, 5)  # 0 for horisontal
-    punkt_generator(sensor_kryss_punkter, sensor_kryss_verdier, kryss, 0, 10)  # 0 for horisontal
+    # punkt_generator(sensor_kryss_punkter, sensor_kryss_verdier, kryss, 0, 1, 10, 5)
+    punkt_generator(sensor_kryss_punkter, sensor_kryss_verdier, kryss, 0, 10)  # 0 for horisontal line of points
 
     if len(contours_main_tracker) > 0:
 
-        c = max(contours_main_tracker, key=cv2.contourArea)
-        M = cv2.moments(c)
+        largest_contour = max(contours_main_tracker, key=cv2.contourArea)
+        moment = cv2.moments(largest_contour)
 
-        if M["m00"] != 0:
-            cx = int(M["m10"] / M["m00"])
+        if moment["m00"] != 0:
+            cx = int(moment["m10"] / moment["m00"])
             cxLive = cx
-        #	cy = int(M["m10"]/M["m00"])
 
         # SETTER CX = 180 NÅR VIEWPORT GÅR UTENFOR REKKEVIDDE TIL HØYRE
-        elif cxLive > 150 and M["m00"] == 0:
+        elif cxLive > 150 and moment["m00"] == 0:
             cx = 180
         else:
             cx = 1
 
         cv2.circle(main_tracker, (cx, 10), 2, (0, 255, 0), 2)
         print(cx)
+    else:
+        print("No road found")  # Rotate to find road
 
     cv2.imshow("Frame", frame)
     cv2.imshow("Tracker", main_tracker)
 
     print(sensor_kryss_verdier)
 
-    if sum(sensor_kryss_verdier) == len(sensor_kryss_verdier) * 255:
+    if sum(sensor_kryss_verdier) == len(sensor_kryss_verdier) * 255:  # gange med 0.8 el.?
         print("KRYSS!")
 
     key = cv2.waitKey(25)
