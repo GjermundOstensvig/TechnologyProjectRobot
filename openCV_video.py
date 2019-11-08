@@ -13,7 +13,24 @@ w_senter = int(width / 2)
 h_senter = int(height / 2)
 
 
-def punkt_generator(punkter, verdier, omraade, retning, fra, til, intervall):
+# Takes an area of a video frame, and returns a collection of points and a list of their values.
+# Retning sets weather the line of dots is oriented horizontally or vertically.
+def punkt_generator_ny(punkter, verdier, omraade, retning, ant_punkter):
+    punkter.append([])
+    avstand_mellom_punkter = int((45-ant_punkter)/(ant_punkter-1)) #int((width - ant_punkter) / ant_punkter)
+    for i in range(1, ant_punkter + 1):
+        if retning == 0:
+            punkter[0].append((width - i*avstand_mellom_punkter))
+        else:
+            punkter[0].append((i + avstand_mellom_punkter) * i)
+    for j in range(1, ant_punkter + 1):
+        if retning == 0:
+            verdier.append(omraade[1, punkter[0][j - 1]])  # FRA ROW 1, COLUMN punkter[0][j - 1]
+        else:
+            verdier.append(omraade[punkter[0][j - 1], 1])
+    #return verdier
+
+def punkt_generator_orig(punkter, verdier, omraade, retning, fra, til, intervall):
     punkter.append([])
     for i in range(fra, til + 1):
         if retning == 0:
@@ -26,23 +43,6 @@ def punkt_generator(punkter, verdier, omraade, retning, fra, til, intervall):
         else:
             verdier.append(omraade[punkter[0][j - 1], 1])
     return verdier
-
-
-def punkt_generator(punkter, verdier, omraade, retning, ant_punkter):
-    punkter.append([])
-    avstandMPunkter = int((width - ant_punkter) / ant_punkter)
-    for i in range(1, ant_punkter + 1):
-        if retning == 0:
-            punkter[0].append((width - avstandMPunkter))
-        else:
-            punkter[0].append((i + avstandMPunkter) * i)
-    for j in range(1, ant_punkter + 1):
-        if retning == 0:
-            verdier.append(omraade[1, punkter[0][j - 1]])  # FRA ROW 1, COLUMN punkter[0][j - 1]
-        else:
-            verdier.append(omraade[punkter[0][j - 1], 1])
-    return verdier
-
 
 def pixelate(bilde, px):
     inn = cv2.resize(bilde, (px, px), interpolation=cv2.INTER_LINEAR)
@@ -71,8 +71,11 @@ while True:
 
     kryss = thresh[h_senter - 2:h_senter, 1:width]
     sensor_kryss_punkter, sensor_kryss_verdier = [], []
-    # punkt_generator(sensor_kryss_punkter, sensor_kryss_verdier, kryss, 0, 1, 10, 5)
-    punkt_generator(sensor_kryss_punkter, sensor_kryss_verdier, kryss, 0, 10)  # 0 for horisontal line of points
+    punkt_generator_orig(sensor_kryss_punkter, sensor_kryss_verdier, kryss, 0, 1, 10, 5)
+    print("punkter")
+    print(sensor_kryss_punkter)
+    print("verdier")
+    print(sensor_kryss_verdier)
 
     if len(contours_main_tracker) > 0:
 
@@ -96,8 +99,6 @@ while True:
 
     cv2.imshow("Frame", frame)
     cv2.imshow("Tracker", main_tracker)
-
-    print(sensor_kryss_verdier)
 
     if sum(sensor_kryss_verdier) == len(sensor_kryss_verdier) * 255:  # gange med 0.8 el.?
         print("KRYSS!")
